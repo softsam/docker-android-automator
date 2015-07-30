@@ -1,0 +1,97 @@
+#!/bin/sh
+
+# Automation directory
+AUTOMATION_DIR=~/automation
+PYBOT_ARGS="--variable locale:fr"
+ANDROID_API=19
+
+# Directory containing the apk to install
+APK_DIR=${AUTOMATION_DIR}/apk
+# Directory containing the robot framework tests
+ROBOT_DIR=${AUTOMATION_DIR}/robot
+# Directory containing the VNC recorded videos
+VNC_DIR=${AUTOMATION_DIR}/vnc
+
+
+# Shell colors
+RED="\033[31m"
+NO_COLOR="\033[0m"
+
+# Check directories are created
+check_directory_structure()
+{
+	if [ ! -d $APK_DIR ]
+	then
+		echo "${RED}The directory $APK_DIR does not exist. Create it and put the apk to test in it.${NO_COLOR}"
+		exit 1
+	fi
+
+	if [ ! -d $ROBOT_DIR ]
+	then
+		echo "${RED}The directory $ROBOT_DIR does not exist. Create it and put the robot framework test code in it.${NO_COLOR}"
+		exit 2
+	fi
+
+	if [ ! -d $VNC_DIR ]
+	then
+		mkdir $VNC_DIR
+	fi
+}
+
+# Cleanup dockers
+cleanup()
+{
+	docker rm -f android 2> /dev/null 
+	docker rm -f appium 2> /dev/null
+	docker rm -f robot 2> /dev/null
+	docker rm -f vncrecorder 2> /dev/null
+}
+
+# Run emulator
+run_emulator()
+{
+	docker run -d -p 5555:5555 -p 5900:5900 --name android softsam/android-${ANDROID_API}
+}
+
+# Run appium server
+run_appium_server()
+{
+	docker run -d --link android:appium2android -p 4723:4723 --name appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium
+}
+
+# Connect appium & emulator
+connect_appium_to_emulator()
+{
+	docker exec -i -t appium adb connect android:5555
+}
+
+# Run robot framework tests
+run_tests()
+{
+	docker run --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS .
+}
+
+start_recording()
+{
+	docker run -d --link android:vncrecorder2android --name vncrecorder -v ${VNC_DIR}:/vnc -d richnorth/vnc-recorder -o /vnc/record.flv android
+}
+
+stop_recording()
+{
+#	docker stop vncrecorder
+#TODO: implement me
+}
+
+# Main program
+check_directory_structure
+cleanup
+run_emulator
+run_appium_server
+# wait for appium server docker to be ready
+sleep 5
+connect_appium_to_emulator
+start_recording
+run_tests
+stop_recording
+cleanup
+
