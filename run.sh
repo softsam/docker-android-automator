@@ -95,8 +95,7 @@ start_recording()
 stop_recording()
 {
     log_info "Stopping video recording"
-    # TODO: implement me in a different way
-    docker stop vncrecorder
+    docker kill -s INT vncrecorder
 
 }
 
