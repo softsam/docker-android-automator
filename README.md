@@ -22,7 +22,7 @@ Assuming you have the following directory structure:
 
 Run the following command:
 
-    docker run -i -t --name automator -p 5900:5900 --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e LOG=file --name automator softsam/automator
+    docker run -i -t --name automator -p 5900:5900 --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e LOG=file --name automator softsam/android-automator
 
 And your robot framework tests in the robot directory will be run on an android emulator.
 
