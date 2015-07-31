@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Automation directory
 AUTOMATION_DIR=~/automation
@@ -41,12 +41,12 @@ check_directory_structure()
 
 log_info()
 {
-    echo "${GREEN}${1}${NO_COLOR}"
+    echo -e "${GREEN}${1}${NO_COLOR}"
 }
 
 log_error()
 {
-    echo "${RED}${1}${NO_COLOR}"
+    echo -e "${RED}${1}${NO_COLOR}"
 }
 
 # Cleanup dockers
@@ -70,12 +70,23 @@ run_emulator()
 run_appium_server()
 {
     log_info "Starting appium server"
-    docker run -d --link android:appium2android -p 4723:4723 --name appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium
+    docker run -d --link android:appium2android -p 4723:4723 --name appium -e APPIUM_ARGS="" -v ${APK_DIR}:/apk softsam/appium
+}
+
+wait_for_emulator()
+{
+    bootanim=""
+    until [[ "$bootanim" =~ "stopped" ]]; do
+       bootanim=`docker exec appium adb -e shell getprop init.svc.bootanim 2>&1`
+       echo "Waiting for emulator to start...$bootanim"
+       sleep 1
+    done
 }
 
 # Connect appium & emulator
 connect_appium_to_emulator()
 {
+	log_info "Connect appium to emulator"
     docker exec -i -t appium adb connect android:5555
 }
 
@@ -104,9 +115,10 @@ check_directory_structure
 cleanup
 run_emulator
 run_appium_server
-# wait for appium server docker to be ready
-sleep 5
+log_info "Wait for emulator to be ready"
+sleep 10
 connect_appium_to_emulator
+wait_for_emulator
 start_recording
 run_tests
 stop_recording
