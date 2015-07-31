@@ -27,3 +27,9 @@ Run the following command:
 And your robot framework tests in the robot directory will be run on an android emulator.
 
 This will also generate a video of the test session in the vnc directory.
+
+## Running the tests behind a proxy
+
+Assuming your docker installation is properly configured, adding the http_proxy environment variable to the run docker command will to the job.
+
+    docker run -i -t --name automator -p 5900:5900 --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e LOG=file -e http_proxy=http://proxy:8080 --name automator softsam/android-automator
