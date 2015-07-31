@@ -89,7 +89,7 @@ run_tests()
 start_recording()
 {
     log_info "Starting video recording"
-    docker run -d --link android:vncrecorder2android --name vncrecorder -v ${VNC_DIR}:/vnc -d richnorth/vnc-recorder -o /vnc/record.flv android
+    docker run -d --link android:vncrecorder2android --name vncrecorder -v ${VNC_DIR}:/vnc softsam/vncrecorder -o /vnc/record.flv android
 }
 
 stop_recording()
