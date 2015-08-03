@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM softsam/adb:latest
 
 MAINTAINER softsam
 
