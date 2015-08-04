@@ -83,7 +83,7 @@ run_appium_server_on_physical_device()
 # Wait for the emulator boot sequence to be over
 wait_for_emulator()
 {
-    bootanim=""
+    local bootanim=""
     until [[ "$bootanim" =~ "stopped" ]]; do
        bootanim=`docker exec appium adb -e shell getprop init.svc.bootanim 2>&1`
        echo "Waiting for emulator to start...$bootanim"
@@ -95,7 +95,7 @@ wait_for_emulator()
 # Param: the id of the device to check
 wait_for_device()
 {
-    bootanim=""
+    local bootanim=""
     until [[ "$bootanim" =~ "stopped" ]]; do
        bootanim=`docker exec appium adb -s $1 shell getprop init.svc.bootanim 2>&1`
        echo "Waiting for device to start...$bootanim"
@@ -113,7 +113,7 @@ connect_appium_to_emulator()
 # Run robot framework tests
 run_tests()
 {
-    android_api=$1
+    local android_api=$1
     log_info "Running robot framework tests for android api $android_api"
     docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS --variable android_api:$android_api .
 }
@@ -121,7 +121,6 @@ run_tests()
 run_tests_on_all_physical_devices()
 {
     local devices=$(list_devices)
-    echo "DEVICES LIST: $devices"
     for device in $devices
     do
         local sdk_version=$(get_device_sdk $device)
