@@ -113,25 +113,46 @@ connect_appium_to_emulator()
 # Run robot framework tests
 run_tests()
 {
-    log_info "Running robot framework tests"
-    docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS .
+    android_api=$1
+    log_info "Running robot framework tests for android api $android_api"
+    docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS --variable android_api:$android_api .
 }
 
 run_tests_on_all_physical_devices()
 {
-    devices=`adb devices | grep "device" | awk 'NR>1 {print $1}'`
-    adb kill-server
+    local devices=$(list_devices)
+    echo "DEVICES LIST: $devices"
     for device in $devices
     do
-        log_info "Running test on device $device"
+        local sdk_version=$(get_device_sdk $device)
+        log_info "Running test on device $device with sdk $sdk_version"
+        # Release connection to device
         run_appium_server_on_physical_device $device
         log_info "Wait for appium server to be ready"
         sleep 10
         #wait_for_device $device
-        run_tests
+        run_tests $sdk_version
         # remove appium server
         docker rm -f appium
     done
+}
+
+# List all connected physical devices
+list_devices()
+{
+    adb start-server &> /dev/null
+    local devices=`adb devices | awk 'NR>1 {print $1}'`
+    adb kill-server &> /dev/null
+    echo $devices
+}
+
+# Get the sdk version of the given device
+get_device_sdk()
+{
+    adb start-server &> /dev/null
+    local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk`
+    adb kill-server &> /dev/null
+    echo $sdk_version
 }
 
 run_tests_on_emulator()
@@ -143,7 +164,7 @@ run_tests_on_emulator()
     connect_appium_to_emulator
     wait_for_emulator
     start_recording
-    run_tests
+    run_tests $ANDROID_API
     stop_recording
 }
 
