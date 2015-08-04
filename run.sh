@@ -70,9 +70,17 @@ run_emulator()
 run_appium_server()
 {
     log_info "Starting appium server"
-    docker run -d --link android:appium2android -p 4723:4723 --name appium -e APPIUM_ARGS="" -v ${APK_DIR}:/apk softsam/appium
+    docker run -d --link android:appium2android -p 4723:4723 --name appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium
 }
 
+# Run appium server on real device
+run_appium_server_on_physical_device()
+{
+    log_info "Starting appium server"
+    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium
+}
+
+# Wait for the emulator boot sequence to be over
 wait_for_emulator()
 {
     bootanim=""
@@ -83,10 +91,22 @@ wait_for_emulator()
     done
 }
 
+# Wait for a specific device boot sequence to be over
+# Param: the id of the device to check
+wait_for_device()
+{
+    bootanim=""
+    until [[ "$bootanim" =~ "stopped" ]]; do
+       bootanim=`docker exec appium adb -s $1 shell getprop init.svc.bootanim 2>&1`
+       echo "Waiting for device to start...$bootanim"
+       sleep 1
+    done
+}
+
 # Connect appium & emulator
 connect_appium_to_emulator()
 {
-	log_info "Connect appium to emulator"
+    log_info "Connect appium to emulator"
     docker exec -i -t appium adb connect android:5555
 }
 
@@ -94,7 +114,37 @@ connect_appium_to_emulator()
 run_tests()
 {
     log_info "Running robot framework tests"
-    docker run --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS .
+    docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS .
+}
+
+run_tests_on_all_physical_devices()
+{
+    devices=`adb devices | grep "device" | awk 'NR>1 {print $1}'`
+    adb kill-server
+    for device in $devices
+    do
+        log_info "Running test on device $device"
+        run_appium_server_on_physical_device $device
+        log_info "Wait for appium server to be ready"
+        sleep 10
+        #wait_for_device $device
+        run_tests
+        # remove appium server
+        docker rm -f appium
+    done
+}
+
+run_tests_on_emulator()
+{
+    run_emulator
+    run_appium_server
+    log_info "Wait for appium server to be ready"
+    sleep 10
+    connect_appium_to_emulator
+    wait_for_emulator
+    start_recording
+    run_tests
+    stop_recording
 }
 
 start_recording()
@@ -107,20 +157,12 @@ stop_recording()
 {
     log_info "Stopping video recording"
     docker kill -s INT vncrecorder
-
 }
 
 # Main program
 check_directory_structure
 cleanup
-run_emulator
-run_appium_server
-log_info "Wait for emulator to be ready"
-sleep 10
-connect_appium_to_emulator
-wait_for_emulator
-start_recording
-run_tests
-stop_recording
+run_tests_on_all_physical_devices
+run_tests_on_emulator
 cleanup
 
