@@ -3,7 +3,7 @@
 # Automation directory
 AUTOMATION_DIR=~/automation
 PYBOT_ARGS="--variable locale:fr"
-ANDROID_API=19
+ANDROID_APIS=(16 17 18 19 21 22)
 
 # Directory containing the apk to install
 APK_DIR=${AUTOMATION_DIR}/apk
@@ -62,8 +62,9 @@ cleanup()
 # Run emulator
 run_emulator()
 {
-    log_info "Starting emulator"
-    docker run -d -p 5555:5555 -p 5900:5900 --name android softsam/android-${ANDROID_API}
+    local android_api=$1
+    log_info "Starting emulator for SDK $android_api"
+    docker run -d -p 5555:5555 -p 5900:5900 --name android softsam/android-${android_api}
 }
 
 # Run appium server
@@ -107,7 +108,12 @@ wait_for_device()
 connect_appium_to_emulator()
 {
     log_info "Connect appium to emulator"
-    docker exec -i -t appium adb connect android:5555
+    local device=""
+    while [[ "${device}" = "" ]]; do
+       docker exec appium adb connect android:5555
+       device=`docker exec appium adb devices|awk 'NR>1 {print $1}'`
+       sleep 1
+    done
 }
 
 # Run robot framework tests
@@ -156,15 +162,22 @@ get_device_sdk()
 
 run_tests_on_emulator()
 {
-    run_emulator
-    run_appium_server
-    log_info "Wait for appium server to be ready"
-    sleep 10
-    connect_appium_to_emulator
-    wait_for_emulator
-    start_recording
-    run_tests $ANDROID_API
-    stop_recording
+    for sdk_version in ${ANDROID_APIS[@]}
+    do
+        log_info "Starting test on emulator SDK=${sdk_version}"
+        run_emulator $sdk_version
+        run_appium_server
+        log_info "Wait for appium server to be ready"
+        sleep 10
+        connect_appium_to_emulator
+        wait_for_emulator
+        start_recording
+        run_tests $sdk_version
+        stop_recording
+        docker rm -f appium
+        docker rm -f android
+        docker rm -f vncrecorder
+    done
 }
 
 start_recording()
