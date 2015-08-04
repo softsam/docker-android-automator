@@ -9,8 +9,8 @@ ANDROID_APIS=(16 17 18 19 21 22)
 APK_DIR=${AUTOMATION_DIR}/apk
 # Directory containing the robot framework tests
 ROBOT_DIR=${AUTOMATION_DIR}/robot
-# Directory containing the VNC recorded videos
-VNC_DIR=${AUTOMATION_DIR}/vnc
+# Directory containing the output of the tests
+OUTPUT_DIR=${AUTOMATION_DIR}/output
 
 
 # Shell colors
@@ -33,9 +33,10 @@ check_directory_structure()
         exit 2
     fi
 
-    if [ ! -d $VNC_DIR ]
+    # Create output dir if it does not exist
+    if [ ! -d $OUTPUT_DIR ]
     then
-        mkdir $VNC_DIR
+        mkdir $OUTPUT_DIR
     fi
 }
 
@@ -117,11 +118,15 @@ connect_appium_to_emulator()
 }
 
 # Run robot framework tests
+# First argument: the sdk version of the device / emulator
+# Second argument: the output directory of the tests
 run_tests()
 {
     local android_api=$1
+    local output_dir=$2
+    local pybot_args="$PYBOT_ARGS --log /output/log.html --report /output/report.html --output /output/output.xml"
     log_info "Running robot framework tests for android api ${android_api}"
-    docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS --variable android_api:$android_api .
+    docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable android_api:$android_api .
 }
 
 run_tests_on_all_physical_devices()
@@ -136,7 +141,12 @@ run_tests_on_all_physical_devices()
         log_info "Wait for appium server to be ready"
         sleep 10
         #wait_for_device $device
-        run_tests $sdk_version
+        local output_dir=$OUTPUT_DIR/$device
+        if [ ! -d $output_dir ]
+        then
+            mkdir $output_dir
+        fi
+        run_tests $sdk_version $output_dir
         # remove appium server
         docker rm -f appium
     done
@@ -171,8 +181,13 @@ run_tests_on_emulator()
         sleep 10
         connect_appium_to_emulator
         wait_for_emulator
-        start_recording
-        run_tests $sdk_version
+        local output_dir=$OUTPUT_DIR/emulator-${sdk_version}
+        if [ ! -d $output_dir ]
+        then
+            mkdir $output_dir
+        fi
+        start_recording $output_dir
+        run_tests $sdk_version $output_dir
         stop_recording
         docker rm -f appium
         docker rm -f android
@@ -180,10 +195,13 @@ run_tests_on_emulator()
     done
 }
 
+# Start to record the vnc feed of the emulator
+# Argument: the output directory of the video
 start_recording()
 {
+    local output_dir=$1
     log_info "Starting video recording"
-    docker run -d --link android:vncrecorder2android --name vncrecorder -v ${VNC_DIR}:/vnc softsam/vncrecorder -o /vnc/record.flv android
+    docker run -d --link android:vncrecorder2android --name vncrecorder -v ${output_dir}:/vnc softsam/vncrecorder -o /vnc/record.flv android
 }
 
 stop_recording()
