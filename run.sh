@@ -114,7 +114,7 @@ connect_appium_to_emulator()
 run_tests()
 {
     local android_api=$1
-    log_info "Running robot framework tests for android api $android_api"
+    log_info "Running robot framework tests for android api ${android_api}"
     docker run --rm --link appium:robot2appium --name robot -v ${ROBOT_DIR}:/robot softsam/robotframework-appium $PYBOT_ARGS --variable android_api:$android_api .
 }
 
@@ -149,7 +149,7 @@ list_devices()
 get_device_sdk()
 {
     adb start-server &> /dev/null
-    local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk`
+    local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk | tr -d '\r'`
     adb kill-server &> /dev/null
     echo $sdk_version
 }
