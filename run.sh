@@ -138,7 +138,7 @@ then
         . run-devices.sh
 	run_tests_on_all_physical_devices
 fi
-if [ -n $sdk_list ]
+if [ -n "$sdk_list" ]
 then
         . run-emulator.sh
 	run_tests_on_emulator $sdk_list
