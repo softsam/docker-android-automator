@@ -25,7 +25,12 @@ EXPOSE 5900
 ADD https://raw.githubusercontent.com/jpetazzo/dind/master/wrapdocker /usr/local/bin/wrapdocker
 RUN chmod +x /usr/local/bin/wrapdocker
 
+# Script that will handle the orchestration of the containers
 ADD ./run.sh /run.sh
 RUN chmod +x /run.sh
+ADD ./run-emulator.sh /run-emulator.sh
+ADD ./run-devices.sh /run-devices.sh
+
+WORKDIR /
 
 ENTRYPOINT ["wrapdocker", "/run.sh"]
