@@ -3,7 +3,7 @@
 run_appium_server_on_physical_device()
 {
     log_info "Starting appium server"
-    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium
+    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium
 }
 
 # Wait for a specific device boot sequence to be over
@@ -12,7 +12,7 @@ wait_for_device()
 {
     local bootanim=""
     until [[ "$bootanim" =~ "stopped" ]]; do
-       bootanim=`docker exec appium adb -s $1 shell getprop init.svc.bootanim 2>&1`
+       bootanim=`docker exec $docker_appium adb -s $1 shell getprop init.svc.bootanim 2>&1`
        echo "Waiting for device to start...$bootanim"
        sleep 1
     done
@@ -37,7 +37,7 @@ run_tests_on_all_physical_devices()
         fi
         run_tests $device $sdk_version $output_dir
         # remove appium server
-        docker rm -f appium
+        docker rm -f $docker_appium
     done
 }
 
