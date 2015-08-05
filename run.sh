@@ -1,10 +1,10 @@
 #!/bin/bash
 
+PYBOT_ARGS="--variable locale:fr"
+
+# CONSTANTS
 # Automation directory
 AUTOMATION_DIR=~/automation
-PYBOT_ARGS="--variable locale:fr"
-ANDROID_APIS=(16 17 18 19 21 22)
-
 # Directory containing the apk to install
 APK_DIR=${AUTOMATION_DIR}/apk
 # Directory containing the robot framework tests
@@ -12,11 +12,31 @@ ROBOT_DIR=${AUTOMATION_DIR}/robot
 # Directory containing the output of the tests
 OUTPUT_DIR=${AUTOMATION_DIR}/output
 
-
 # Shell colors
 RED="\033[31m"
 GREEN="\033[32m"
 NO_COLOR="\033[0m"
+
+
+# Parse arguments
+parse_arguments()
+{
+    args=`getopt -l sdk:,devices s:d $*`
+    set -- $args
+    while true;do
+        case $1 in
+            -s|--sdk)
+                sdk_list=`eval echo $2 | tr -s "," "  "`;shift;shift;continue
+            ;;
+            -d|--devices)
+                run_on_physical_device="yes";shift;continue
+            ;;
+            --)
+               break
+            ;;
+        esac
+    done
+}
 
 # Check directories are created
 check_directory_structure()
@@ -172,7 +192,8 @@ get_device_sdk()
 
 run_tests_on_emulator()
 {
-    for sdk_version in ${ANDROID_APIS[@]}
+    local sdk_list=$@
+    for sdk_version in $sdk_list
     do
         log_info "Starting test on emulator SDK=${sdk_version}"
         run_emulator $sdk_version
@@ -211,9 +232,15 @@ stop_recording()
 }
 
 # Main program
+sdk_list=""
+run_on_physical_device=""
+parse_arguments $@
 check_directory_structure
 cleanup
-run_tests_on_all_physical_devices
-run_tests_on_emulator
+if [[ $run_on_physical_device = "yes" ]]
+then
+	run_tests_on_all_physical_devices
+fi
+run_tests_on_emulator $sdk_list
 cleanup
 

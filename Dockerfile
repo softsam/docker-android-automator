@@ -28,4 +28,4 @@ RUN chmod +x /usr/local/bin/wrapdocker
 ADD ./run.sh /run.sh
 RUN chmod +x /run.sh
 
-CMD wrapdocker /run.sh
+ENTRYPOINT ["wrapdocker", "/run.sh"]
