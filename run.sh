@@ -21,7 +21,7 @@ NO_COLOR="\033[0m"
 # Parse arguments
 parse_arguments()
 {
-    args=`getopt -l sdk:,devices s:d $*`
+    args=`getopt -l sdk:,devices,help s:dh $*`
     set -- $args
     while true;do
         case $1 in
@@ -31,11 +31,24 @@ parse_arguments()
             -d|--devices)
                 run_on_physical_device="yes";shift;continue
             ;;
+            -h|--help)
+                show_help;exit;
+            ;;
             --)
                break
             ;;
         esac
     done
+}
+
+show_help()
+{
+    echo "Automator tool to run tests on android devices and emulators."
+    echo ""
+    echo "Provide at least one of the following options:"
+    echo "    [ -d | --devices ] Tests will run on every physical device available."
+    echo "    [ -s | --sdk ] Tests will run on the given sdk. Ex: --sdk 16,18,22"
+    echo "    [ -h | --help ] Display this message."
 }
 
 # Check directories are created
