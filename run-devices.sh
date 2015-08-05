@@ -35,7 +35,7 @@ run_tests_on_all_physical_devices()
         then
             mkdir $output_dir
         fi
-        run_tests $sdk_version $output_dir
+        run_tests $device $sdk_version $output_dir
         # remove appium server
         docker rm -f appium
     done

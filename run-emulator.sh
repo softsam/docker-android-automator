@@ -49,13 +49,14 @@ run_tests_on_emulator()
         sleep 10
         connect_appium_to_emulator
         wait_for_emulator
-        local output_dir=$OUTPUT_DIR/emulator-${sdk_version}
+        local device=emulator-${sdk_version}
+        local output_dir=$OUTPUT_DIR/$device
         if [ ! -d $output_dir ]
         then
             mkdir $output_dir
         fi
         start_recording $output_dir
-        run_tests $sdk_version $output_dir
+        run_tests $device $sdk_version $output_dir
         stop_recording
         docker rm -f appium
         docker rm -f android
