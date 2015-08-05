@@ -16,7 +16,7 @@ RUN apt-get update && \
 VOLUME /var/lib/docker
 
 # Give access to automation directory, containing the apks, robot framework tests and output
-VOLUME /root/automation
+VOLUME /automation
 
 # Expose port for VNC (to connect to the emulator and see the tests playing live)
 EXPOSE 5900
@@ -32,5 +32,8 @@ ADD ./run-emulator.sh /run-emulator.sh
 ADD ./run-devices.sh /run-devices.sh
 
 WORKDIR /
+
+# wrapdocker will log in a file
+ENV LOG file
 
 ENTRYPOINT ["wrapdocker", "/run.sh"]

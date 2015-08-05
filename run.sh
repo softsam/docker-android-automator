@@ -4,7 +4,7 @@ PYBOT_ARGS="--variable locale:fr"
 
 # CONSTANTS
 # Automation directory
-AUTOMATION_DIR=~/automation
+AUTOMATION_DIR=/automation
 # Directory containing the apk to install
 APK_DIR=${AUTOMATION_DIR}/apk
 # Directory containing the robot framework tests
@@ -110,7 +110,7 @@ run_tests()
     local output_dir=$3
     local pybot_args="$PYBOT_ARGS --log /output/log.html --report /output/report.html --output /output/output.xml"
     log_info "Running robot framework tests for android api ${android_api}"
-    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable android_api:$android_api .
+    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable automator_android_api:$android_api .
     if [[ $? != 0 ]]
     then
         tests_in_failure[${#tests_in_failure}]="Tests failed for device $device on API $android_api"
