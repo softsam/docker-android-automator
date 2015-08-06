@@ -99,16 +99,19 @@ cleanup()
 }
 
 # Run robot framework tests
-# First argument: the sdk version of the device / emulator
-# Second argument: the output directory of the tests
+# First argument: the device on which the tests are run
+# Second argument: the sdk version of the device / emulator
+# Third argument: the locale of the device /emulator
+# Fourth argument: the output directory of the tests
 run_tests()
 {
     local device=$1
     local android_api=$2
-    local output_dir=$3
+    local locale=$3
+    local output_dir=$4
     local pybot_args="--log /output/log.html --report /output/report.html --output /output/output.xml"
     log_info "Running robot framework tests for android api ${android_api}"
-    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable automator_android_api:$android_api --variable automator_locale:fr .
+    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable automator_android_api:$android_api --variable automator_locale:${locale} .
     if [[ $? != 0 ]]
     then
         tests_in_failure[${#tests_in_failure}]="Tests failed for device $device on API $android_api"

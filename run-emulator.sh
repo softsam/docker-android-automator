@@ -44,6 +44,8 @@ run_tests_on_emulator()
     do
         log_info "Starting test on emulator SDK=${sdk_version}"
         run_emulator $sdk_version
+        # Hard coded, will be parameterizable in next version
+        local device_locale="en"
         run_appium_server
         log_info "Wait for appium server to be ready"
         sleep 10
@@ -56,7 +58,7 @@ run_tests_on_emulator()
             mkdir $output_dir
         fi
         start_recording $output_dir
-        run_tests $device $sdk_version $output_dir
+        run_tests $device $sdk_version $device_locale $output_dir
         stop_recording
         docker rm -f $docker_appium
         docker rm -f $docker_android

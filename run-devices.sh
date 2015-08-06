@@ -24,6 +24,7 @@ run_tests_on_all_physical_devices()
     for device in $devices
     do
         local sdk_version=$(get_device_sdk $device)
+        local device_locale=$(get_device_locale $device)
         log_info "Running test on device $device with sdk $sdk_version"
         # Release connection to device
         run_appium_server_on_physical_device $device
@@ -35,7 +36,7 @@ run_tests_on_all_physical_devices()
         then
             mkdir $output_dir
         fi
-        run_tests $device $sdk_version $output_dir
+        run_tests $device $sdk_version $device_locale $output_dir
         # remove appium server
         docker rm -f $docker_appium
     done
@@ -55,6 +56,16 @@ get_device_sdk()
 {
     adb start-server &> /dev/null
     local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk | tr -d '\r'`
+    adb kill-server &> /dev/null
+    echo $sdk_version
+}
+
+# Get the locale of the given device. Locale is returned in lower case.
+# First argument: the device to connect to
+get_device_locale()
+{
+    adb start-server &> /dev/null
+    local device_locale=`adb -s $1 shell getprop ro.product.locale.region | tr -d '\r' | tr '[:upper:]' '[:lower:]'`
     adb kill-server &> /dev/null
     echo $sdk_version
 }
