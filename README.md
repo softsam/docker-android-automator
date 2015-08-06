@@ -116,6 +116,14 @@ The robot framework tests are run using the pybot command. When run, the tests a
 - automator_android_api: the value of the SDK on which the test is run. You will need this since appium needs a different automation name depending on the SDK version (Selendroid if your API is lower than 17, Appium else).
 - automator_locale: the locale of the device on which the tests runs.
 
+## Passing custom arguments to your robot framework tests
+
+In some cases you need to pass your robot framework tests additional arguments, such as a platform, or any other environment data. The image allows you to provide the arguments you wish to pybot, using the -a (or --pybot-args) option.
+
+For example, if you wish to specify some variable to your tests, you can do it by running the following command:
+
+    docker run --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 22 -a "--variable platform:dev"
+
 ## You want more?
 
 If this image does not provide the level of control you seek, take a look at the images it uses, they may save you some time.

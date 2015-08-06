@@ -19,27 +19,47 @@ NO_COLOR="\033[0m"
 # Parse arguments
 parse_arguments()
 {
-    args=`getopt -l sdk:,devices,prefix:,help s:dp:h $*`
-    set -- $args
+    args=`getopt -l sdk:,devices,prefix:,help,pybot-args: s:dp:ha: $*`
+    local parsing_pybot=false
     while true;do
         case $1 in
             -s|--sdk)
+                parsing_pybot=false
                 sdk_list=`eval echo $2 | tr -s "," "  "`;shift;shift;continue
             ;;
             -d|--devices)
+                parsing_pybot=false
                 run_on_physical_device="yes";shift;continue
             ;;
             -p|--prefix)
+                parsing_pybot=false
                 prefix=`eval echo $2`;shift;shift;continue
             ;;
             -h|--help)
+                parsing_pybot=false
                 show_help;exit;
+            ;;
+            -a|--pybot-args)
+                parsing_pybot=true
+                pybot_args=`eval echo "$2"`;shift;shift;continue
             ;;
             --)
                break
             ;;
             *)
-               show_help;exit;
+               if test -z $1
+               then
+                   # no more args
+                   break
+               fi
+
+               if [[ $parsing_pybot = true ]]
+               then
+                   pybot_args="${pybot_args} `eval echo "$1"`";shift;continue
+               else
+                   show_help;exit;
+              fi
+           ;;
         esac
     done
 }
@@ -53,6 +73,7 @@ show_help()
     echo "    [ -s | --sdk ] Tests will run on the given sdk. Ex: --sdk 16,18,22"
     echo "    [ -p | -- prefix ] Prefix you containers inside the automator, to be able to run parallel tests."
     echo "                    Use this option if you wish to run this container several times in parallel, with different names, to avoid conflicts"
+    echo "    [ -a | -- pybot-args ] Additional custom pybot arguments. Ex: -a \"--variable platform:dev\""
     echo "    [ -h | --help ] Display this message."
 }
 
@@ -109,9 +130,9 @@ run_tests()
     local android_api=$2
     local locale=$3
     local output_dir=$4
-    local pybot_args="--log /output/log.html --report /output/report.html --output /output/output.xml"
+    local pybot_args="--log /output/log.html --report /output/report.html --output /output/output.xml --variable automator_android_api:$android_api --variable automator_locale:${locale} $pybot_args"
     log_info "Running robot framework tests for android api ${android_api}"
-    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args --variable automator_android_api:$android_api --variable automator_locale:${locale} .
+    docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium $pybot_args .
     if [[ $? != 0 ]]
     then
         tests_in_failure[${#tests_in_failure}]="Tests failed for device $device on API $android_api"
@@ -121,6 +142,7 @@ run_tests()
 # Main program
 sdk_list=""
 run_on_physical_device=""
+pybot_args=""
 tests_in_failure=()
 parse_arguments $@
 check_directory_structure
