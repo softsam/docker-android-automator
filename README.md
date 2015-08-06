@@ -77,6 +77,7 @@ Run the following command to execute your tests on APIs 17 and 21:
 This will also generate a video of the test session in the output directory, along with the tests logs.
 
 You can run tests on the following SDKs:
+
 - 16
 - 17
 - 18
@@ -127,7 +128,9 @@ For example, if you wish to specify some variable to your tests, you can do it b
 ## You want more?
 
 If this image does not provide the level of control you seek, take a look at the images it uses, they may save you some time.
+
 This image heavily relies on the following images:
+
 - [softsam/adb](https://registry.hub.docker.com/u/softsam/adb/)
 - [softsam/android](https://registry.hub.docker.com/u/softsam/android/)
 - [softsam/android-22](https://registry.hub.docker.com/u/softsam/android-22/) (and all the other SDKs)
