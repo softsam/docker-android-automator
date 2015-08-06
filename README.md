@@ -91,7 +91,7 @@ Note: you can run at the same time tests on the connected device and on emulator
 
 Assuming your docker installation is properly configured, adding the http_proxy environment variable to the run docker command will to the job.
 
-    docker run --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 22
+    docker run --privileged -v ~/automation:/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 22
 
 ### Running tests in parallel
 
@@ -100,15 +100,15 @@ You may want to run tests in parallel to get a faster feedback. In order to achi
 To run tests on SDKs 17 and 22 in parallel, run the following commands (in 2 shells):
 
 
-    docker run --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 17 -p sdk17
+    docker run --privileged -v ~/automation:/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 17 -p sdk17
 
 
-    docker run --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 22 -p sdk22
+    docker run --privileged -v ~/automation:/automation -v /var/lib/docker:/var/lib/docker -e http_proxy=http://proxy:8080 softsam/android-automator -s 22 -p sdk22
 
 ## Visualizing the tests in real time on an emulator
 
 When running tests on an emulator, a video is recorded, but you can still see the tests in live, via VNC. Run the docker container with the __-p 5900:5900__ option:
-    docker run --privileged -p 5900:5900 -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 22
+    docker run --privileged -p 5900:5900 -v ~/automation:/automation -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 22
 
 
 ## Arguments passed to your robot framework tests
@@ -123,7 +123,7 @@ In some cases you need to pass your robot framework tests additional arguments, 
 
 For example, if you wish to specify some variable to your tests, you can do it by running the following command:
 
-    docker run --privileged -v ~/automation:/root/automation -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 22 -a "--variable platform:dev"
+    docker run --privileged -v ~/automation:/automation -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 22 -a "--variable platform:dev"
 
 ## You want more?
 
