@@ -114,6 +114,7 @@ When running tests on an emulator, a video is recorded, but you can still see th
 
 The robot framework tests are run using the pybot command. When run, the tests are given the following arguments (as variables):
 - automator_android_api: the value of the SDK on which the test is run. You will need this since appium needs a different automation name depending on the SDK version (Selendroid if your API is lower than 17, Appium else).
+- automator_locale: the locale of the device on which the tests runs.
 
 ## You want more?
 
