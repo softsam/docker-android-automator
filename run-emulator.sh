@@ -4,14 +4,14 @@ run_emulator()
 {
     local android_api=$1
     log_info "Starting emulator for SDK $android_api"
-    docker run -d -p 5555:5555 -p 5900:5900 --name $docker_android softsam/android-${android_api}
+    docker run -d -p 5555:5555 -p 5900:5900 --name $docker_android softsam/android-${android_api}:latest
 }
 
 # Run appium server
 run_appium_server()
 {
     log_info "Starting appium server"
-    docker run -d --link ${docker_android}:android -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium
+    docker run -d --link ${docker_android}:android -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium:latest
 }
 
 # Wait for the emulator boot sequence to be over
@@ -72,7 +72,7 @@ start_recording()
 {
     local output_dir=$1
     log_info "Starting video recording"
-    docker run -d --link ${docker_android}:android --name $docker_vncrecorder -v ${output_dir}:/vnc softsam/vncrecorder -o /vnc/record.flv android
+    docker run -d --link ${docker_android}:android --name $docker_vncrecorder -v ${output_dir}:/vnc softsam/vncrecorder:latest -o /vnc/record.flv android
 }
 
 stop_recording()

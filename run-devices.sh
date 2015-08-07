@@ -3,7 +3,7 @@
 run_appium_server_on_physical_device()
 {
     log_info "Starting appium server"
-    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium
+    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium:latest
 }
 
 # Wait for a specific device boot sequence to be over
