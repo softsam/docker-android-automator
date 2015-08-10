@@ -46,7 +46,7 @@ run_tests_on_all_physical_devices()
 list_devices()
 {
     adb start-server &> /dev/null
-    local devices=`adb devices | awk 'NR>1 {print $1}'`
+    local devices=`adb devices | grep -v "*" | awk 'NR>1 {print $1}'`
     adb kill-server &> /dev/null
     echo $devices
 }
@@ -55,7 +55,7 @@ list_devices()
 get_device_sdk()
 {
     adb start-server &> /dev/null
-    local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk | tr -d '\r'`
+    local sdk_version=`adb -s $1 shell getprop ro.build.version.sdk | grep -v "*" | tr -d '\r'`
     adb kill-server &> /dev/null
     echo $sdk_version
 }
@@ -65,7 +65,7 @@ get_device_sdk()
 get_device_locale()
 {
     adb start-server &> /dev/null
-    local device_locale=`adb -s $1 shell getprop persist.sys.language | tr -d '\r'`
+    local device_locale=`adb -s $1 shell getprop persist.sys.language | grep -v "*" | tr -d '\r'`
     adb kill-server &> /dev/null
     echo $device_locale
 }
