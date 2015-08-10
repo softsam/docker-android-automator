@@ -4,7 +4,7 @@ run_emulator()
 {
     local android_api=$1
     log_info "Starting emulator for SDK $android_api"
-    docker run -d -p 5555:5555 -p 5900:5900 --name $docker_android softsam/android-${android_api}:latest
+    docker run -d -p 5555:5555 -p 5900:5900 -e http_proxy="$http_proxy" --name $docker_android softsam/android-${android_api}:latest
 }
 
 # Run appium server
