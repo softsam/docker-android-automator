@@ -132,6 +132,7 @@ run_tests()
     local output_dir=$4
     local pybot_args="--log /output/log.html --report /output/report.html --output /output/output.xml --variable automator_android_api:$android_api --variable automator_locale:${locale} $pybot_args"
     log_info "Running robot framework tests for android api ${android_api}"
+    docker pull softsam/robotframework-appium:latest
     docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${output_dir}:/output softsam/robotframework-appium:latest $pybot_args .
     if [[ $? != 0 ]]
     then
