@@ -168,6 +168,7 @@ then
 	run_tests_on_emulator $sdk_list
 fi
 cleanup
+chmod -R a+w $OUTPUT_DIR
 if [ ${#tests_in_failure} -ne 0 ]
 then
     log_error "There are tests in failure"
