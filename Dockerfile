@@ -31,6 +31,9 @@ RUN chmod +x /run.sh
 ADD ./run-emulator.sh /run-emulator.sh
 ADD ./run-devices.sh /run-devices.sh
 
+# APK to change locale
+ADD ./android_locales.apk /android_locales.apk
+
 WORKDIR /
 
 # wrapdocker will log in a file

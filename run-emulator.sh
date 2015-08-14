@@ -44,23 +44,22 @@ run_tests_on_emulator()
     local sdk_list=$@
     for sdk_version in $sdk_list
     do
-        log_info "Starting test on emulator SDK=${sdk_version}"
         run_emulator $sdk_version
-        # Hard coded, will be parameterizable in next version
-        local device_locale="en"
         run_appium_server
         log_info "Wait for appium server to be ready"
         sleep 10
         connect_appium_to_emulator
         wait_for_emulator
-        local device=emulator-${sdk_version}
-        local output_dir=$OUTPUT_DIR/$device
+        local device=emulator-5554
+        local output_dir=$OUTPUT_DIR/emulator-${sdk_version}
         if [ ! -d $output_dir ]
         then
             mkdir $output_dir
         fi
+        log_info "Installing locale change tool"
+        install_locale_change_tool $device
         start_recording $output_dir
-        run_tests $device $sdk_version $device_locale $output_dir
+        run_tests_for_all_locales $device $sdk_version $output_dir
         stop_recording
         docker rm -f $docker_appium
         docker rm -f $docker_android
