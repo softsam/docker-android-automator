@@ -21,7 +21,7 @@ NO_COLOR="\033[0m"
 # Parse arguments
 parse_arguments()
 {
-    args=`getopt -l sdk:,devices,prefix:,help,pybot-args:,locales: s:dp:ha:l: $*`
+    args=`getopt -l sdk:,devices,prefix:,help,pybot-args:,locales:,arch: s:dp:ha:l:c: $*`
     local parsing_pybot=false
     while true;do
         case $1 in
@@ -48,6 +48,10 @@ parse_arguments()
             -l|--locales)
                 parsing_pybot=false
                 locales_list=`eval echo "$2" | tr -s "," "  "`;shift;shift;continue
+            ;;
+            -c|--arch)
+                parsing_pybot=false
+                architecture=`eval echo "$2"`;shift;shift;continue
             ;;
             --)
                break
@@ -81,6 +85,7 @@ show_help()
     echo "                    Use this option if you wish to run this container several times in parallel, with different names, to avoid conflicts"
     echo "    [ -a | -- pybot-args ] Additional custom pybot arguments. Ex: -a \"--variable platform:dev\""
     echo "    [ -l | -- locales ] Tests will run for each given locale. Ex: --locales en,fr,es,ru. If not provided, will run on the default device / emulator locale. Emulators are in en by default."
+    echo"     [ -c | --arch ] The architecture of the emulators. Only used when running tests on emulators, 2 values can be provided: arm or x86. Using x86 architecture requires your system to have kvm and support virtualization (not possible if your are using boot2docker). Default is arm (slower but works on all environments)."
     echo "    [ -h | --help ] Display this message."
 }
 
@@ -103,6 +108,26 @@ check_directory_structure()
     if [ ! -d $OUTPUT_DIR ]
     then
         mkdir $OUTPUT_DIR
+    fi
+}
+
+# Check the requested emulator architecture is supported
+check_architecture()
+{
+    if [[ $architecture == "x86" ]]
+    then
+        if [ ! -d /dev/kvm ]
+        then
+            log_error "You must provide the /dev/kvm directory as a volume if you wish to run emulators with x86 architecture. Also, make sure you run the container with the --privileged option."
+            exit 3
+        fi
+        return;
+    fi
+
+    if [[ $architecture != "arm" ]]
+    then
+        log_error "Unsupported architecture. Only x86 and arm are supported."
+        exit 4
     fi
 }
 
@@ -213,9 +238,11 @@ sdk_list=""
 locales_list=""
 run_on_physical_device=""
 pybot_args=""
+architecture=arm
 tests_in_failure=()
 parse_arguments $@
 check_directory_structure
+check_architecture
 docker_prefix=""
 if [[ $prefix != "" ]]
 then

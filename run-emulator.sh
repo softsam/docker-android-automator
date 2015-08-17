@@ -1,11 +1,19 @@
 
 # Run emulator
+# First argument: The SDK version
+# Second argument: The architecture (x86 or arm)
 run_emulator()
 {
     local android_api=$1
-    log_info "Starting emulator for SDK $android_api"
+    local android_architecture=$2
+    log_info "Starting emulator for SDK $android_api on architecture $android_architecture"
     docker pull softsam/android-${android_api}:latest
-    docker run -d -p 5555:5555 -p 5900:5900 -e http_proxy="$http_proxy" --name $docker_android softsam/android-${android_api}:latest
+    local virtualization_options=""
+    if [[ $android_architecture == "x86" ]]
+    then
+        virtualization_options="--privileged -v /dev/kvm:/dev/kvm"
+    fi
+    docker run -d -p 5555:5555 -p 5900:5900 -e http_proxy="$http_proxy" -e ANDROID_ARCH="$2" $virtualization_options --name $docker_android softsam/android-${android_api}:latest
 }
 
 # Run appium server
@@ -44,7 +52,7 @@ run_tests_on_emulator()
     local sdk_list=$@
     for sdk_version in $sdk_list
     do
-        run_emulator $sdk_version
+        run_emulator $sdk_version $architecture
         run_appium_server
         log_info "Wait for appium server to be ready"
         sleep 10

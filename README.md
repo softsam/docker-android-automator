@@ -81,6 +81,22 @@ You can run tests on the following SDKs:
 
 Note: you can run at the same time tests on the connected device and on emulators.
 
+
+#### Emulators architectures
+
+By default, emulators are run in _arm_. Since _arm_ emulators are rather slow, you may prefer to use x86 images instead, to speed up your tests. Running x86 emulators requires your system to be able to run virtualization inside docker. To achieve this, your host will need to have kvm installed (not doable if you are running docker on MacOS or Windows, since boot2docker relies on Virtual Box, which does not support this feature).
+
+If you are running on linux (or in VMWare), you can install the kvm packages, and start the android-automator container with 2 additionnal options:
+
+- __-v /dev/kvm:/dev/kvm__
+- __ --arch x86__
+
+This will run the emulators in x86, and should greatly improve their performances.
+
+Here is the full command to run your tests with x86 emulators:
+
+    docker run --privileged -v ~/automation:/automation -v /dev/kvm:/dev/kvm -v /var/lib/docker:/var/lib/docker softsam/android-automator -s 17,21 --arch x86
+
 ### Running the tests behind a proxy
 
 Assuming your docker installation is properly configured, adding the http_proxy environment variable to the run docker command will to the job.
