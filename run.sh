@@ -212,7 +212,7 @@ change_locale()
     local device=$1
     local locale=$2
     
-    docker exec ${docker_appium} adb shell am start -n com.orange.androidlocales/.ChangeLocaleActivity_ -e language $locale
+    docker exec ${docker_appium} adb -s $device shell am start -n com.orange.androidlocales/.ChangeLocaleActivity_ -e language $locale
     log_info "Locale set to $locale on device $device"
 }
 
