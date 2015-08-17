@@ -89,7 +89,7 @@ By default, emulators are run in _arm_. Since _arm_ emulators are rather slow, y
 If you are running on linux (or in VMWare), you can install the kvm packages, and start the android-automator container with 2 additionnal options:
 
 - __-v /dev/kvm:/dev/kvm__
-- __ --arch x86__
+- __--arch x86__
 
 This will run the emulators in x86, and should greatly improve their performances.
 
