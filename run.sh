@@ -119,7 +119,7 @@ log_error()
 # Cleanup dockers
 cleanup()
 {
-    log_info "Removing previous containers"
+    log_info "Removing containers"
     docker rm -f $docker_android 2> /dev/null 
     docker rm -f $docker_appium 2> /dev/null
     docker rm -f $docker_robot 2> /dev/null
