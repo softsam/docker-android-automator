@@ -11,6 +11,8 @@ ROBOT_DIR=${AUTOMATION_DIR}/robot
 OUTPUT_DIR=${AUTOMATION_DIR}/output
 # default locale when none is provided
 DEFAULT_LOCALE="en"
+# Android locales apk (used to change locale of devices)
+ANDROID_LOCALES_APK=/android_locales.apk 
 
 # Shell colors
 RED="\033[31m"
@@ -218,11 +220,8 @@ change_locale()
 # First argument: the device on which the tool should be installed
 install_locale_change_tool()
 {
-
-    adb start-server &> /dev/null
-    adb -s $1 install -r /android_locales.apk 
-    adb -s $1 shell pm grant com.orange.androidlocales android.permission.CHANGE_CONFIGURATION
-    adb kill-server &> /dev/null
+    docker exec ${docker_appium} adb -s $1 install -r $ANDROID_LOCALES_APK
+    docker exec ${docker_appium} adb -s $1 shell pm grant com.orange.androidlocales android.permission.CHANGE_CONFIGURATION
 }
 
 # Get the locale of the given device.

@@ -4,7 +4,7 @@ run_appium_server_on_physical_device()
 {
     log_info "Starting appium server"
     docker pull softsam/appium:latest
-    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk softsam/appium:latest
+    docker run -d --privileged -v /dev/bus/usb:/dev/bus/usb -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="-U $1" -v ${APK_DIR}:/apk -v ${ANDROID_LOCALES_APK}:${ANDROID_LOCALES_APK} softsam/appium:latest
 }
 
 # Wait for a specific device boot sequence to be over
@@ -25,11 +25,11 @@ run_tests_on_all_physical_devices()
     for device in $devices
     do
         local sdk_version=$(get_device_sdk $device)
-        log_info "Installing locale change tool"
-        install_locale_change_tool $device
         run_appium_server_on_physical_device $device
         log_info "Wait for appium server to be ready"
         sleep 10
+        log_info "Installing locale change tool"
+        install_locale_change_tool $device
         #wait_for_device $device
         local output_dir=$OUTPUT_DIR/$device
         if [ ! -d $output_dir ]

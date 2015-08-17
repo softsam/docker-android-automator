@@ -21,7 +21,7 @@ run_appium_server()
 {
     log_info "Starting appium server"
     docker pull softsam/appium:latest
-    docker run -d --link ${docker_android}:android -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk softsam/appium:latest
+    docker run -d --link ${docker_android}:android -p 4723:4723 --name $docker_appium -e APPIUM_ARGS="--suppress-adb-kill-server" -v ${APK_DIR}:/apk -v ${ANDROID_LOCALES_APK}:${ANDROID_LOCALES_APK} softsam/appium:latest
 }
 
 # Wait for the emulator boot sequence to be over
@@ -58,7 +58,8 @@ run_tests_on_emulator()
         sleep 10
         connect_appium_to_emulator
         wait_for_emulator
-        local device=emulator-5554
+        #local device=emulator-5554
+        local device=android:5555
         local output_dir=$OUTPUT_DIR/emulator-${sdk_version}
         if [ ! -d $output_dir ]
         then
