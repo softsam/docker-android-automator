@@ -116,7 +116,7 @@ check_architecture()
 {
     if [[ $architecture == "x86" ]]
     then
-        if [ ! -d /dev/kvm ]
+        if [ ! -e /dev/kvm ]
         then
             log_error "You must provide the /dev/kvm directory as a volume if you wish to run emulators with x86 architecture. Also, make sure you run the container with the --privileged option."
             exit 3
