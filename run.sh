@@ -200,7 +200,7 @@ run_tests()
     docker run --rm --link ${docker_appium}:appium --name $docker_robot -v ${ROBOT_DIR}:/robot -v ${pybot_output_dir}:/output softsam/robotframework-appium:latest $pybot_args .
     if [[ $? != 0 ]]
     then
-        tests_in_failure[${#tests_in_failure}]="Tests failed for device $device on API $android_api and locale $locale"
+        tests_in_failure[${#tests_in_failure[@]}]="Tests failed for device $device on API $android_api and locale $locale"
     fi
 }
 
