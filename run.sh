@@ -229,6 +229,10 @@ install_locale_change_tool()
 get_device_locale()
 {
     local device_locale=`docker exec ${docker_appium} adb -s $1 shell getprop persist.sys.language | grep -v "*" | tr -d '\r'`
+    if [ -z "$device_locale" ]
+    then
+        device_locale=`docker exec ${docker_appium} adb -s $1 shell getprop ro.product.locale.language | grep -v "*" | tr -d '\r'`
+    fi
     echo $device_locale
 }
 
